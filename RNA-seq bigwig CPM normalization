@@ -13,7 +13,6 @@ conda activate ucsc_tools
 
 module load samtools
 module load bedtools
-module load deeptools
 
 # Directories
 INPUT_DIR="/scratch/scheon/RNA-seq/scratch/scheon/0723/bams_GRCh38p14/"
