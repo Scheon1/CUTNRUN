@@ -1,0 +1,40 @@
+#!/bin/bash
+#SBATCH --job-name=bam_to_bigwig
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=16G
+#SBATCH --time=8:00:00
+#SBATCH --output=%x_%j.out
+#SBATCH --error=%x_%j.err
+
+# Load required modules
+source ~/miniconda3/bin/activate
+
+conda activate ucsc_tools
+
+module load samtools
+module load bedtools
+module load deeptools
+
+# Directories
+INPUT_DIR="/scratch/scheon/RNA-seq/scratch/scheon/0723/bams_GRCh38p14/"
+OUTPUT_DIR=/scratch/scheon/RNA-seq/scratch/scheon/0723/Bigwig/
+GENOME_FA_INDEX="/project/6005116/scheon/RNA-seq/GRCh38.p14/GRCh38.p14.genome.fa.fai"
+
+# File containing list of BAM files to process
+BAM_LIST="bam_list.txt"
+
+mkdir -p "$OUTPUT_DIR"
+
+while IFS= read -r BAM_FILE; do
+  FULL_PATH="$INPUT_DIR/$BAM_FILE"
+  BASENAME=$(basename "$BAM_FILE" .Aligned.sortedByCoord.out.bam)
+
+  bamCoverage -b "$FULL_PATH" -o "$OUTPUT_DIR/${BASENAME}.bw" \
+    --normalizeUsing BPM \
+    --binSize 10 \
+    --effectiveGenomeSize 2913022398 \
+    --ignoreDuplicates \
+
+done < "$BAM_LIST"
+
+conda deactivate
